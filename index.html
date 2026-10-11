@@ -1,6 +1,141 @@
-<!doctype html>
-<html lang="te"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mana Velugu Digital Media</title><meta name="description" content="మన వెలుగు డిజిటల్ మీడియా తెలుగు వార్తలు"><style>
-:root{--orange:#f28c00;--yellow:#ffd33d;--ink:#202020;--muted:#666;--line:#e7e7e7}*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Telugu",sans-serif;color:var(--ink);background:#f6f6f6}.top{background:linear-gradient(110deg,#f28c00,#ffd33d);padding:22px 16px;text-align:center}.brand{font-size:clamp(26px,5vw,42px);font-weight:800;margin:0}.tag{margin:6px 0 0}.nav{background:#222;color:white;padding:11px 16px;text-align:center}.wrap{max-width:1050px;margin:22px auto;padding:0 14px}.status{background:#fff3d0;border:1px solid #f0d68b;border-radius:8px;padding:12px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.card{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 2px 7px #0000000a}.card img,.card video{width:100%;max-height:270px;object-fit:cover;background:#eee;display:block}.body{padding:15px}.date{font-size:12px;color:var(--muted)}h2{font-size:21px;line-height:1.45;margin:8px 0}.details{line-height:1.7;white-space:pre-wrap}.link{display:inline-block;margin-top:12px;background:#f28c00;color:#171717;padding:9px 13px;border-radius:5px;text-decoration:none;font-weight:bold}.empty{text-align:center;padding:30px;background:#fff;border-radius:10px;color:var(--muted)}footer{text-align:center;padding:25px;color:#666;font-size:13px}@media(max-width:500px){.top{padding:18px 10px}}
-</style></head><body><header class="top"><h1 class="brand">మన వెలుగు</h1><p class="tag">Mana Velugu Digital Media · ప్రతి అక్షరం జనం కోసం</p></header><div class="nav">తెలుగు వార్తలు | స్థానికం | రాష్ట్రం | దేశం | వీడియోలు</div><main class="wrap"><div id="status" class="status">వార్తలను లోడ్ చేస్తోంది…</div><div id="news" class="grid"></div></main><footer>© Mana Velugu Digital Media</footer><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script>
-(async()=>{const status=document.getElementById('status'),root=document.getElementById('news');const c=window.MV_CONFIG||{};if(!c.supabaseUrl||!c.supabaseKey||c.supabaseUrl.includes('PASTE_')||c.supabaseKey.includes('PASTE_')){status.textContent='వెబ్‌సైట్ కనెక్షన్ ఇంకా సెటప్ కాలేదు. config.js లో కొత్త Supabase URL మరియు Publishable/anon key ఇవ్వాలి.';return}const sb=window.supabase.createClient(c.supabaseUrl,c.supabaseKey);try{const {data,error}=await sb.from('news_articles').select('id,title,details,news_url,image_url,video_url,created_at').eq('published',true).order('created_at',{ascending:false});if(error)throw error;status.textContent=data.length?`తాజా వార్తలు: ${data.length}`:'ప్రస్తుతం ప్రచురించిన వార్తలు లేవు.';root.innerHTML='';for(const n of data){const card=document.createElement('article');card.className='card';let media='';if(n.image_url)media+=`<img src="${esc(n.image_url)}" alt="వార్త ఫోటో" loading="lazy">`;if(n.video_url)media+=`<div class="body"><video src="${esc(n.video_url)}" controls playsinline></video></div>`;card.innerHTML=media+`<div class="body"><div class="date">${new Date(n.created_at).toLocaleDateString('te-IN')}</div><h2>${esc(n.title)}</h2><div class="details">${esc(n.details||'')}</div>${n.news_url?`<a class="link" href="${esc(n.news_url)}" target="_blank" rel="noopener">పూర్తి వార్త చదవండి</a>`:''}</div>`;root.appendChild(card)}}catch(e){status.textContent='వార్తలను లోడ్ చేయలేకపోయాం. Supabase SQL మరియు కనెక్షన్ సెట్టింగులు పరిశీలించండి.';console.error(e)}function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}})();
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f28c00">
+<title>మన వెలుగు | తెలుగు వార్తలు</title>
+<style>
+:root{--orange:#f28c00;--yellow:#ffd33d;--dark:#222}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f5;color:#222;font-family:"Noto Sans Telugu",sans-serif}
+header{text-align:center;background:linear-gradient(110deg,#ff9d00,#ffe34d);padding:20px 10px}
+header h1{font-size:36px;margin:0;font-weight:800}
+header p{margin:8px 0 0;font-size:16px}
+nav{background:#222;color:white;padding:13px 8px;display:flex;gap:22px;overflow:auto;white-space:nowrap}
+nav a{color:white;text-decoration:none}
+main{max-width:1000px;margin:18px auto;padding:0 12px}
+.status{background:#fff4ce;padding:14px;border-radius:10px;margin-bottom:16px;line-height:1.8}
+h2{border-left:5px solid var(--orange);padding-left:10px}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px #0001}
+.card img{width:100%;height:200px;object-fit:cover;background:#eee}
+.card-content{padding:14px}
+.card h3{margin:0 0 10px;font-size:21px;line-height:1.6}
+.card p{line-height:1.8;white-space:pre-wrap}
+.category{color:#b76500;font-size:14px}
+.read{display:inline-block;background:var(--orange);color:#111;padding:9px 14px;border-radius:5px;text-decoration:none;margin:5px 0}
+.empty{text-align:center;padding:30px;background:white;border-radius:8px}
+footer{text-align:center;padding:28px 10px;color:#666}
+video{width:100%;max-height:300px;background:#111}
+</style>
+</head>
+<body>
+<header>
+<h1>మన వెలుగు</h1>
+<p>Mana Velugu Digital Media · ప్రతి అక్షరం జనం కోసం</p>
+</header>
+<nav>
+<a href="./">హోమ్</a>
+<a href="#news">తెలుగు వార్తలు</a>
+<a href="#news">స్థానికం</a>
+<a href="#news">రాష్ట్రం</a>
+<a href="#news">దేశం</a>
+<a href="#news">వీడియోలు</a>
+</nav>
+<main>
+<div id="status" class="status">వార్తలను లోడ్ చేస్తున్నాం...</div>
+<h2 id="news">తాజా వార్తలు</h2>
+<div id="news-list" class="news-grid"></div>
+</main>
+<footer>© మన వెలుగు డిజిటల్ మీడియా</footer>
+
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+ const status=document.getElementById("status");
+ const list=document.getElementById("news-list");
+ const cfg=window.MANA_VELUGU_CONFIG;
+
+ if(!cfg || !cfg.supabaseUrl || !cfg.supabaseKey){
+   status.textContent="config.js సెట్టింగులు అందలేదు. GitHubలో config.js ఫైల్ ఉందో చూడండి.";
+   return;
+ }
+ if(cfg.supabaseKey.startsWith("sb_secret_")){
+   status.textContent="తప్పు API కీ. Secret key వాడకండి; Publishable key మాత్రమే ఉపయోగించండి.";
+   return;
+ }
+ if(!window.supabase){
+   status.textContent="Supabase కనెక్షన్ లోడ్ కాలేదు. ఇంటర్నెట్‌ను పరిశీలించండి.";
+   return;
+ }
+ try{
+   const db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
+   const {data,error}=await db.from("news")
+      .select("*")
+      .eq("published",true)
+      .order("created_at",{ascending:false});
+
+   if(error) throw error;
+   status.textContent=data.length
+      ? "మన వెలుగు తాజా వార్తలు"
+      : "ప్రస్తుతం ప్రచురించిన వార్తలు లేవు.";
+
+   data.forEach(n=>{
+     const card=document.createElement("article");
+     card.className="card";
+     if(n.image_url){
+       const img=document.createElement("img");
+       img.src=n.image_url;
+       img.alt=n.title||"వార్తా చిత్రం";
+       img.loading="lazy";
+       card.appendChild(img);
+     }
+     const content=document.createElement("div");
+     content.className="card-content";
+
+     const category=document.createElement("div");
+     category.className="category";
+     category.textContent=n.category||"తెలుగు వార్తలు";
+     content.appendChild(category);
+
+     const title=document.createElement("h3");
+     title.textContent=n.title||"శీర్షిక లేదు";
+     content.appendChild(title);
+
+     if(n.body){
+       const body=document.createElement("p");
+       body.textContent=n.body;
+       content.appendChild(body);
+     }
+     if(n.video_url){
+       const link=document.createElement("a");
+       link.className="read";
+       link.href=n.video_url;
+       link.target="_blank";
+       link.rel="noopener noreferrer";
+       link.textContent="వీడియో చూడండి";
+       content.appendChild(link);
+     }
+     if(n.news_url){
+       const link=document.createElement("a");
+       link.className="read";
+       link.href=n.news_url;
+       link.target="_blank";
+       link.rel="noopener noreferrer";
+       link.textContent="పూర్తి వార్త చదవండి";
+       content.appendChild(link);
+     }
+     card.appendChild(content);
+     list.appendChild(card);
+   });
+ }catch(e){
+   console.error(e);
+   status.textContent="వార్తలు లోడ్ కాలేదు. Supabase news టేబుల్, కాలమ్స్, అనుమతులను తనిఖీ చేయాలి.";
+ }
+})();
+</script>
+</body>
+</html>
